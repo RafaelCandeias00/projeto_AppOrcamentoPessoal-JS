@@ -1,5 +1,5 @@
-class Despesa{
-    constructor(ano, mes, dia, tipo, descricao, valor){
+class Despesa {
+    constructor(ano, mes, dia, tipo, descricao, valor) {
         this.ano = ano;
         this.mes = mes;
         this.dia = dia;
@@ -8,33 +8,52 @@ class Despesa{
         this.valor = valor
     }
 
-    validarDados(){
-        for(let i in this){
-            if(this[i] == undefined || this[i] == '' || this[i] == null){
+    validarDados() {
+        for (let i in this) {
+            if (this[i] == undefined || this[i] == '' || this[i] == null) {
                 return false
             }
         }
         return true
     }
 }
-class BD{
-    constructor(){
+class BD {
+    constructor() {
         let id = localStorage.getItem('id')
 
-        if(id === null){
+        if (id === null) {
             localStorage.setItem('id', 0)
         }
     }
-    getProximoId(){
+    getProximoId() {
         let proximoId = localStorage.getItem('id')
         return parseInt(proximoId) + 1
     }
-    gravar(d){
+    gravar(d) {
         let id = this.getProximoId()
 
         localStorage.setItem(id, JSON.stringify(d))
 
         localStorage.setItem('id', id)
+    }
+
+    recuperarTodosRegistros() {
+        //array de despesas
+        let despesas = Array()
+
+        let id = localStorage.getItem('id')
+
+        // recuperar todos os dados do localStorage
+        for (let i = 1; i <= id; i++) {
+            let despesa = JSON.parse(localStorage.getItem(i))
+
+            if (despesa === null) {
+                continue
+            } else {
+                despesas.push(despesa)
+            }
+        }
+        return despesas
     }
 }
 
@@ -49,25 +68,25 @@ function cadastrarDespesa() {
     let valor = document.getElementById('valor')
 
     let despesa = new Despesa(
-        ano.value, 
+        ano.value,
         mes.value,
         dia.value,
         tipo.value,
         descricao.value,
         valor.value)
 
-    if(despesa.validarDados()){
+    if (despesa.validarDados()) {
         bd.gravar(despesa)
-        
+
         document.getElementById('modal_titulo').innerHTML = 'Registro inserido com sucesso'
         document.getElementById('modal_titulo_div').className = 'modal-header text-success'
         document.getElementById('modal_conteudo').innerHTML = 'Despesa foi cadastrada com sucesso!'
 
         document.getElementById('modal_btn').innerHTML = 'Voltar'
         document.getElementById('modal_btn').className = 'btn btn-success'
-        
+
         $('#modalRegistraDespesa').modal('show')
-    }else{
+    } else {
         document.getElementById('modal_titulo').innerHTML = 'Erro na inclusão do registro'
         document.getElementById('modal_titulo_div').className = 'modal-header text-danger'
         document.getElementById('modal_conteudo').innerHTML = 'Erro ao gravação, verifique se todos os campos foram preenchidos corretamente'
@@ -77,5 +96,44 @@ function cadastrarDespesa() {
 
         $('#modalRegistraDespesa').modal('show')
     }
-    
+
+}
+
+
+function carregaListaDespesas() {
+    let despesas = Array()
+
+    despesas = bd.recuperarTodosRegistros()
+
+    var listaDespesas = document.getElementById('listaDespesas')
+
+    //percorrendo array
+    despesas.forEach(function (d) {
+        // criando linha (tr)
+        let linha = listaDespesas.insertRow()
+
+        // criando coluna (td)
+        linha.insertCell(0).innerHTML = `${d.dia}/${d.mes}/${d.ano}`
+        switch (d.tipo) {
+            case "1":
+                d.tipo = 'Alimentação'
+                break;
+            case "2":
+                d.tipo = 'Educação'
+                break;
+            case "3":
+                d.tipo = 'Lazer'
+                break;
+            case "4":
+                d.tipo = 'Saúde'
+                break;
+            case "5":
+                d.tipo = 'Transporte'
+                break;
+        }
+        linha.insertCell(1).innerHTML = `${d.tipo}`
+
+        linha.insertCell(2).innerHTML = `${d.descricao}`
+        linha.insertCell(3).innerHTML = `${d.valor}`
+    })
 }
