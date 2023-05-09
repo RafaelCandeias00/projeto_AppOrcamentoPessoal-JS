@@ -55,6 +55,37 @@ class BD {
         }
         return despesas
     }
+
+    pesquisar(despesa){
+        let despesasFiltradas = Array()
+        despesasFiltradas = this.recuperarTodosRegistros()
+        
+        if(despesa.ano != ''){
+            despesasFiltradas = despesasFiltradas.filter(d => d.ano == despesa.ano)
+        }
+        
+        if(despesa.mes != ''){
+            despesasFiltradas = despesasFiltradas.filter(d => d.mes == despesa.mes)
+        }
+
+        if(despesa.dia != ''){
+            despesasFiltradas = despesasFiltradas.filter(d => d.dia == despesa.dia)
+        }
+
+        if(despesa.tipo != ''){
+            despesasFiltradas = despesasFiltradas.filter(d => d.tipo == despesa.tipo)
+        }
+
+        if(despesa.descricao != ''){
+            despesasFiltradas = despesasFiltradas.filter(d => d.descricao == despesa.descricao)
+        }
+
+        if(despesa.valor != ''){
+            despesasFiltradas = despesasFiltradas.filter(d => d.valor == despesa.valor)
+        }
+
+        return despesasFiltradas
+    }
 }
 
 let bd = new BD()
@@ -86,6 +117,13 @@ function cadastrarDespesa() {
         document.getElementById('modal_btn').className = 'btn btn-success'
 
         $('#modalRegistraDespesa').modal('show')
+
+        ano.value = ''
+        mes.value = ''
+        dia.value = ''
+        tipo.value = ''
+        descricao.value = ''
+        valor.value = ''
     } else {
         document.getElementById('modal_titulo').innerHTML = 'Erro na inclusão do registro'
         document.getElementById('modal_titulo_div').className = 'modal-header text-danger'
@@ -100,12 +138,13 @@ function cadastrarDespesa() {
 }
 
 
-function carregaListaDespesas() {
-    let despesas = Array()
-
-    despesas = bd.recuperarTodosRegistros()
+function carregaListaDespesas(despesas = Array(), filtro = false) {
+    if(despesas.length == 0 && filtro == false){
+        despesas = bd.recuperarTodosRegistros()
+    }
 
     var listaDespesas = document.getElementById('listaDespesas')
+    listaDespesas.innerHTML = ''
 
     //percorrendo array
     despesas.forEach(function (d) {
@@ -136,4 +175,18 @@ function carregaListaDespesas() {
         linha.insertCell(2).innerHTML = `${d.descricao}`
         linha.insertCell(3).innerHTML = `${d.valor}`
     })
+}
+
+function pesquisarDespesas(){
+    let ano = document.getElementById('ano').value
+    let mes = document.getElementById('mes').value
+    let dia = document.getElementById('dia').value
+    let tipo = document.getElementById('tipo').value
+    let descricao = document.getElementById('descricao').value
+    let valor = document.getElementById('valor').value
+
+    let despesa = new Despesa(ano, mes, dia, tipo, descricao, valor)
+    let despesas = bd.pesquisar(despesa)
+
+    carregaListaDespesas(despesas, true)
 }
